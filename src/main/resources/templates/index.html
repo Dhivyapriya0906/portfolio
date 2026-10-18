@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dhivyapriya | Java Backend Developer</title>
+    <script>
+        (() => {
+            try {
+                if (localStorage.getItem('portfolio-theme') === 'light') {
+                    document.documentElement.dataset.theme = 'light';
+                }
+            } catch (_) { /* Keep the default dark theme if storage is unavailable. */ }
+        })();
+    </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         /* ── Design tokens ── */
         :root {
+            color-scheme: dark;
             --bg:          #060b18;
             --panel:       rgba(12, 22, 44, .72);
             --cyan:        #22d3ee;
@@ -22,6 +32,26 @@
             --border:      rgba(100, 150, 230, .18);
             --border-glow: rgba(34, 211, 238, .55);
             --radius-card: 18px;
+            --surface-raised: rgba(10, 20, 42, .82);
+            --nav-surface: rgba(6, 11, 24, .82);
+            --shadow-card: 0 8px 32px rgba(0,0,0,.18), 0 0 0 .5px rgba(255,255,255,.04) inset;
+        }
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7fb;
+            --panel: rgba(255, 255, 255, .92);
+            --cyan: #08718f;
+            --cyan-dim: rgba(8, 145, 178, .12);
+            --purple: #7c3aed;
+            --purple-dim: rgba(124, 58, 237, .12);
+            --blue: #2563eb;
+            --text: #14243b;
+            --muted: #52647a;
+            --border: rgba(65, 89, 119, .18);
+            --border-glow: rgba(8, 145, 178, .42);
+            --surface-raised: rgba(255, 255, 255, .94);
+            --nav-surface: rgba(255, 255, 255, .9);
+            --shadow-card: 0 12px 34px rgba(31, 51, 78, .09), 0 0 0 .5px rgba(30, 55, 85, .06) inset;
         }
 
         /* ── Reset ── */
@@ -33,6 +63,7 @@
             color: var(--text);
             line-height: 1.68;
             overflow-x: hidden;
+            transition: background-color .35s ease;
         }
         a { color: inherit; text-decoration: none; }
         .container { width: min(1180px, 88%); margin: auto; }
@@ -52,11 +83,19 @@
             inset: 0;
             z-index: -2;
             pointer-events: none;
+            transition: background .35s ease;
             background:
                 radial-gradient(ellipse at 78% 18%, rgba(38, 82, 220, .16), transparent 38%),
                 radial-gradient(ellipse at 16% 62%, rgba(119, 38, 205, .11), transparent 38%),
                 radial-gradient(ellipse at 50% 100%, rgba(34, 211, 238, .05), transparent 55%),
                 linear-gradient(135deg, #060b18, #091226 55%, #070a18);
+        }
+        :root[data-theme="light"] body::before {
+            background:
+                radial-gradient(ellipse at 78% 18%, rgba(59, 130, 246, .08), transparent 38%),
+                radial-gradient(ellipse at 16% 62%, rgba(124, 58, 237, .06), transparent 38%),
+                radial-gradient(ellipse at 50% 100%, rgba(8, 145, 178, .05), transparent 55%),
+                linear-gradient(135deg, #f8fbff, #f1f6fb 55%, #f8f9fc);
         }
 
         /* ── Cursor glow ── */
@@ -81,11 +120,11 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(6, 11, 24, .82);
+            background: var(--nav-surface);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
-            transition: border-color .3s;
+            transition: border-color .3s, box-shadow .35s ease;
         }
         nav.scrolled { border-bottom-color: rgba(34, 211, 238, .22); }
 
@@ -132,6 +171,33 @@
         .nav-links a.active { color: var(--cyan); }
         .nav-links a:hover::after,
         .nav-links a.active::after { width: 100%; }
+
+        /* ── Theme control ── */
+        .nav-actions { display: flex; align-items: center; gap: 13px; flex-shrink: 0; }
+        .theme-toggle {
+            width: 66px; height: 36px; position: relative; display: inline-flex; align-items: center;
+            padding: 3px; border: 1px solid rgba(100, 150, 230, .28); border-radius: 999px;
+            color: #e2e8f0; background: linear-gradient(145deg, #142441, #091326);
+            box-shadow: 0 5px 0 #050a13, 0 8px 16px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.14);
+            cursor: pointer; perspective: 120px; transform: translateY(-2px); font: inherit;
+            transition: transform .2s ease, box-shadow .2s ease, background .3s ease, border-color .3s ease;
+        }
+        .theme-toggle:hover { transform: translateY(-3px) rotateX(4deg); box-shadow: 0 6px 0 #050a13, 0 11px 20px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.16); }
+        .theme-toggle:active { transform: translateY(2px) scale(.98); box-shadow: 0 1px 0 #050a13, 0 3px 8px rgba(0,0,0,.24), inset 0 2px 4px rgba(0,0,0,.2); }
+        .theme-toggle:focus-visible { outline: 3px solid var(--cyan); outline-offset: 4px; }
+        .theme-toggle-track { position: absolute; inset: 3px; display: flex; align-items: center; justify-content: space-between; padding: 0 7px; pointer-events: none; }
+        .theme-toggle-icon { width: 14px; height: 14px; display: block; z-index: 1; transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .3s ease; }
+        .theme-toggle-knob { position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(145deg, #ffffff, #dbeafe); box-shadow: 0 2px 5px rgba(0,0,0,.22), inset 0 1px 1px #fff; transition: transform .42s cubic-bezier(.2,.8,.2,1), background .3s ease; }
+        :root:not([data-theme="light"]) .theme-toggle-sun { opacity: .5; }
+        :root:not([data-theme="light"]) .theme-toggle-moon { opacity: 1; color: #c4b5fd; }
+        :root[data-theme="light"] .theme-toggle { color: #1e3a5f; background: linear-gradient(145deg, #e8f5fb, #d5e8f5); border-color: rgba(8, 131, 163, .3); box-shadow: 0 5px 0 #a8bdce, 0 8px 16px rgba(33, 63, 91, .14), inset 0 1px 1px #fff; }
+        :root[data-theme="light"] .theme-toggle:hover { box-shadow: 0 6px 0 #a8bdce, 0 11px 20px rgba(33, 63, 91, .18), inset 0 1px 1px #fff; }
+        :root[data-theme="light"] .theme-toggle:active { box-shadow: 0 1px 0 #a8bdce, 0 3px 8px rgba(33, 63, 91, .14), inset 0 2px 4px rgba(33, 63, 91, .12); }
+        :root[data-theme="light"] .theme-toggle-knob { transform: translateX(26px); background: linear-gradient(145deg, #ffffff, #c9f2ff); }
+        :root[data-theme="light"] .theme-toggle-sun { opacity: 1; color: #d97706; }
+        :root[data-theme="light"] .theme-toggle-moon { opacity: .45; }
+        :root[data-theme="light"] .theme-toggle-sun { transform: rotate(180deg) scale(1.08); }
+        :root:not([data-theme="light"]) .theme-toggle-moon { transform: rotate(-18deg) scale(1.05); }
 
         /* ── Buttons ── */
         .btn {
@@ -427,7 +493,6 @@
             transform-style: preserve-3d;
             transform: perspective(900px) rotateX(0deg) rotateY(0deg);
             transition: transform .15s ease-out, border-color .3s, box-shadow .3s;
-            will-change: transform;
         }
         .tilt-card::after {
             content: "";
@@ -533,69 +598,63 @@
         .experience h3  { font-size: 18px; font-weight: 700; }
         .experience .date { color: var(--cyan); font-size: 12px; margin: 5px 0 8px; font-weight: 600; letter-spacing: .5px; }
 
-        /* ── Achievements & Education sections (optional extras rendered inline) ── */
-        .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .edu-card { padding: 24px; }
-        .edu-card .label-top {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .edu-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-        .edu-card .sub { color: var(--muted); font-size: 13px; }
+        /* ── Education ── */
+        .education-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        .education-card { padding: 26px; min-width: 0; }
+        .education-card h3 { font-size: 18px; line-height: 1.4; margin-bottom: 8px; }
+        .education-school { color: var(--cyan); font-size: 14px; font-weight: 600; margin-bottom: 9px; }
+        .education-date { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+        .education-detail { color: var(--muted); font-size: 13px; line-height: 1.65; }
 
-        /* ── Academic achievements and recognition ── */
+        /* ── Recognition ── */
         .recognition-section { padding-top: 48px; }
         .recognition-intro { max-width: 700px; margin: -8px auto 36px; text-align: center; }
-        .recognition-grid, .academic-grid, .milestone-grid, .resume-certificate-grid {
-            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;
+        .academic-section { padding-top: 48px; }
+        .academic-grid { width: min(1140px, 100%); margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        .academic-card { min-width: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+        .academic-card:hover { transform: translateY(-5px); border-color: rgba(34, 211, 238, .48); box-shadow: 0 18px 42px rgba(0,0,0,.3), 0 0 22px rgba(34,211,238,.09); }
+        .academic-card h3 { font-size: 17px; line-height: 1.4; }
+        .academic-card p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+        .academic-image-button { display: block; width: 100%; height: 230px; flex: 0 0 230px; padding: 0; overflow: hidden; border: 0; background: #081326; cursor: zoom-in; }
+        .academic-image-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: -3px; }
+        .academic-image { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+        .academic-card:hover .academic-image { transform: scale(1.025); }
+        .semester-six-image { object-position: center 65%; }
+        .academic-copy { min-width: 0; padding: 20px 22px 22px; display: flex; flex: 1; flex-direction: column; gap: 9px; }
+        .academic-meta { color: var(--cyan); font-size: 12px; font-weight: 600; }
+        .recognition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        .recognition-grid {
+            width: min(1140px, 100%); margin-inline: auto;
+            grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px;
         }
-        .recognition-card, .academic-card {
-            overflow: hidden; display: flex; flex-direction: column; height: 100%;
+        .recognition-card {
+            min-width: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%;
             transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
         }
-        .recognition-card:hover, .academic-card:hover, .milestone-card:hover {
+        .recognition-card:hover {
             transform: translateY(-5px); border-color: rgba(34, 211, 238, .48);
             box-shadow: 0 18px 42px rgba(0,0,0,.3), 0 0 22px rgba(34,211,238,.09);
         }
-        .recognition-card h3, .academic-card h3 { font-size: 17px; line-height: 1.4; }
-        .recognition-card p, .academic-card p { color: var(--muted); font-size: 13px; line-height: 1.65; }
-        .recognition-image-button, .academic-image-button {
-            display: block; width: 100%; height: 238px; padding: 0; overflow: hidden;
+        .recognition-card h3 { font-size: 17px; line-height: 1.4; }
+        .recognition-card p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+        .recognition-image-button {
+            display: block; width: 100%; height: 230px; flex: 0 0 230px; padding: 0; overflow: hidden;
             border: 0; background: #081326; cursor: zoom-in;
         }
-        .recognition-image-button:focus-visible, .academic-image-button:focus-visible {
+        .recognition-image-button:focus-visible {
             outline: 2px solid var(--cyan); outline-offset: -3px;
         }
-        .recognition-image, .academic-image { width: 100%; height: 100%; display: block; }
+        .recognition-image { width: 100%; height: 100%; display: block; }
         .recognition-image { object-fit: cover; transition: transform .35s ease; }
         .recognition-card:has(.certificate-image) .recognition-image-button { background: #f8fafc; }
         .recognition-card:has(.certificate-image) .recognition-image { object-fit: contain; padding: 12px; }
-        .recognition-card:hover .recognition-image { transform: scale(1.025); }
-        .academic-image { object-fit: cover; transition: transform .35s ease; }
-        .academic-card:hover .academic-image { transform: scale(1.025); }
-        .recognition-copy, .academic-copy { padding: 22px 24px 24px; display: flex; flex: 1; flex-direction: column; gap: 10px; }
-        .recognition-meta, .academic-meta { color: var(--cyan); font-size: 12px; font-weight: 600; }
+        .recognition-card:has(.certificate-image) .recognition-copy { background: rgba(10, 19, 38, .96); }
+        .recognition-card:hover .recognition-image { transform: scale(1.01); }
+        .recognition-copy { min-width: 0; padding: 20px 22px 22px; display: flex; flex: 1; flex-direction: column; gap: 9px; }
+        .recognition-meta { color: var(--cyan); font-size: 12px; font-weight: 600; }
         .recognition-points { display: grid; gap: 8px; padding: 0; margin: 2px 0 0; list-style: none; color: var(--muted); font-size: 13px; line-height: 1.55; }
         .recognition-points li { position: relative; padding-left: 15px; }
         .recognition-points li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
-        .result-awaiting { min-height: 0; justify-content: center; background: linear-gradient(145deg, rgba(13,30,55,.92), rgba(21,17,48,.78)); }
-        .result-awaiting .awaiting-icon { font-size: 26px; color: var(--cyan); }
-        .milestone-grid { margin-top: 26px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .milestone-card { padding: 20px; min-height: 126px; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
-        .milestone-card strong { display: block; color: var(--cyan); font-size: 20px; line-height: 1.35; margin-bottom: 5px; }
-        .milestone-card span { color: var(--muted); font-size: 12px; }
-        .milestone-card a { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
-        .resume-certificate-list { margin-top: 34px; }
-        .resume-certificate-list h3 { font-size: 18px; margin-bottom: 14px; }
-        .resume-certificate-grid { gap: 14px; }
-        .resume-certificate-card { padding: 17px 19px; min-height: 0; }
-        .resume-certificate-card h4 { font-size: 14px; line-height: 1.5; }
-        .resume-certificate-card p { margin-top: 5px; color: var(--muted); font-size: 11px; }
-        .education-note { margin-top: 24px; }
         .image-preview {
             width: min(94vw, 920px); max-width: none; max-height: 92vh; padding: 18px;
             color: var(--text); background: #080f20; border: 1px solid var(--border-glow);
@@ -687,20 +746,77 @@
             text-shadow: 0 0 12px rgba(34, 211, 238, .55);
         }
 
+        /* ── Light theme component surfaces ── */
+        :root[data-theme="light"] nav { box-shadow: 0 8px 24px rgba(30, 50, 75, .08); }
+        :root[data-theme="light"] nav { background: rgba(255, 255, 255, .92); }
+        :root[data-theme="light"] nav.scrolled { border-bottom-color: rgba(8, 131, 163, .2); }
+        :root[data-theme="light"] .nav-links a { color: #52647a; }
+        :root[data-theme="light"] .nav-links a:hover,
+        :root[data-theme="light"] .nav-links a.active,
+        :root[data-theme="light"] nav a:hover { color: #087f9d; text-shadow: none; }
+        :root[data-theme="light"] h1,
+        :root[data-theme="light"] h2,
+        :root[data-theme="light"] h3,
+        :root[data-theme="light"] h4,
+        :root[data-theme="light"] .section-title,
+        :root[data-theme="light"] .logo { color: #14243b; }
+        :root[data-theme="light"] .gradient-text,
+        :root[data-theme="light"] .logo span { background-image: linear-gradient(100deg, #08718f, #4f46e5, #9333ea); }
+        :root[data-theme="light"] .btn-outline { background: rgba(255,255,255,.8); color: #17324f; border-color: rgba(8,131,163,.42); box-shadow: 0 4px 12px rgba(31,51,78,.07); }
+        :root[data-theme="light"] .btn-outline:hover { color: #087f9d; background: #fff; box-shadow: 0 9px 22px rgba(8,131,163,.13); }
+        :root[data-theme="light"] .btn-primary { color: #082332; box-shadow: 0 8px 20px rgba(8,131,163,.2); }
+        :root[data-theme="light"] .eyebrow { color: #12647b; background: rgba(34,211,238,.12); border-color: rgba(8,131,163,.25); }
+        :root[data-theme="light"] .hero h2 { color: #344b65; }
+        :root[data-theme="light"] .socials a { color: #52647a; }
+        :root[data-theme="light"] .core { background: linear-gradient(145deg, rgba(204,246,255,.96), rgba(224,233,255,.98) 60%, rgba(237,221,255,.94)); border-color: rgba(8,131,163,.4); color: #17324f; box-shadow: 0 18px 44px rgba(55,93,139,.16), inset 0 0 32px rgba(124,58,237,.08); }
+        :root[data-theme="light"] .core p { color: #087f9d; }
+        :root[data-theme="light"] .tech-card { background: var(--surface-raised); border-color: var(--border); box-shadow: 0 12px 28px rgba(31,51,78,.12), 0 0 18px rgba(8,131,163,.05); }
+        :root[data-theme="light"] .tech-card small { color: #52647a; }
+        :root[data-theme="light"] .code-window { color: #087f9d; background: #fff; border-color: rgba(124,58,237,.25); box-shadow: 0 12px 30px rgba(31,51,78,.13); }
+        :root[data-theme="light"] .stats { background: linear-gradient(110deg, rgba(255,255,255,.96), rgba(242,247,255,.96)); border-color: rgba(8,131,163,.18); box-shadow: 0 12px 34px rgba(31,51,78,.07); }
+        :root[data-theme="light"] .stat strong { color: #14243b; }
+        :root[data-theme="light"] .glass-card { box-shadow: var(--shadow-card); }
+        :root[data-theme="light"] .tilt-card:hover { box-shadow: 0 20px 42px rgba(31,51,78,.14), 0 0 24px rgba(8,131,163,.09); }
+        :root[data-theme="light"] .tags span { color: #12647b; background: rgba(8,145,178,.07); border-color: rgba(8,131,163,.2); }
+        :root[data-theme="light"] .recognition-card:has(.certificate-image) .recognition-copy { background: #fff; }
+        :root[data-theme="light"] .recognition-card:has(.certificate-image) .recognition-image-button { background: #f4f7fb; }
+        :root[data-theme="light"] .academic-image-button { background: #edf3f8; }
+        :root[data-theme="light"] .image-preview { color: #14243b; background: #fff; border-color: rgba(8,131,163,.35); box-shadow: 0 24px 90px rgba(31,51,78,.25); }
+        :root[data-theme="light"] .image-preview::backdrop { background: rgba(22,36,56,.45); }
+        :root[data-theme="light"] .preview-caption { color: #52647a; }
+        :root[data-theme="light"] .preview-close { color: #17324f; background: #f2f6fa; border-color: rgba(65,89,119,.2); }
+        :root[data-theme="light"] .contact-box { border-color: rgba(124,58,237,.2); background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.06), transparent 60%), rgba(255,255,255,.9); box-shadow: var(--shadow-card); }
+        :root[data-theme="light"] .contact-box::before { background: linear-gradient(90deg, transparent, rgba(124,58,237,.35), transparent); }
+        :root[data-theme="light"] .contact-box .contact-email { border-color: rgba(8,131,163,.35); }
+        :root[data-theme="light"] footer span { color: #52647a; }
+        :root[data-theme="light"] ::selection { background: rgba(8,145,178,.22); color: #10243e; }
+        :root[data-theme="light"] input,
+        :root[data-theme="light"] textarea,
+        :root[data-theme="light"] select { color: #14243b; background: #fff; border-color: rgba(65,89,119,.25); }
+        :root[data-theme="light"] input::placeholder,
+        :root[data-theme="light"] textarea::placeholder { color: #66788d; }
+
         /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .nav-inner { gap: 14px; }
+            .nav-links { gap: 12px; }
+            .nav-links a { font-size: 11px; }
+            .nav-resume { display: none; }
+            .nav-actions { gap: 0; }
+        }
         @media (max-width: 900px) {
             .nav-links { gap: 14px; }
             .nav-links a { font-size: 12px; }
             .nav-resume { display: none; }
+            .nav-actions { gap: 0; }
             .hero { grid-template-columns: 1fr; padding-top: 62px; }
             .visual { min-height: 440px; }
             .stats { grid-template-columns: repeat(2, 1fr); }
             .stat:nth-child(2) { border-right: none; }
             .stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
             .about-grid { grid-template-columns: 1fr; gap: 26px; }
-            .edu-grid { grid-template-columns: 1fr; }
-            .recognition-grid, .academic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .milestone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .recognition-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .academic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 600px) {
@@ -709,9 +825,13 @@
             .logo { font-size: 20px; }
             .nav-links { width: 100%; overflow-x: auto; padding-bottom: 5px; }
             .nav-links a { white-space: nowrap; }
-            .recognition-grid, .academic-grid, .milestone-grid, .resume-certificate-grid { grid-template-columns: 1fr; }
-            .recognition-image-button, .academic-image-button { height: 210px; }
-            .recognition-copy, .academic-copy { padding: 19px; }
+            .nav-actions { margin-left: auto; }
+            .recognition-grid { grid-template-columns: 1fr; }
+            .academic-grid { grid-template-columns: 1fr; }
+            .recognition-image-button { height: 210px; flex-basis: 210px; }
+            .recognition-copy { padding: 19px; }
+            .academic-image-button { height: 210px; flex-basis: 210px; }
+            .academic-copy { padding: 19px; }
             .hero { padding-top: 44px; }
             .hero h1 { letter-spacing: -1.5px; }
             .hero-copy { font-size: 15px; }
@@ -770,11 +890,21 @@
             <a href="#skills">Skills</a>
             <a href="#projects">Projects</a>
             <a href="#experience">Experience</a>
+            <a href="#education">Education</a>
             <a href="#achievements">Achievements</a>
             <a href="#recognition">Recognition</a>
             <a href="#contact">Contact</a>
         </div>
-        <a class="btn btn-outline nav-resume" href="#contact">Let&rsquo;s Connect ↗</a>
+        <div class="nav-actions">
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false" title="Switch to light theme">
+                <span class="theme-toggle-track" aria-hidden="true">
+                    <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg>
+                    <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.6 8.6 0 1 0 20.4 15.2Z"></path></svg>
+                    <span class="theme-toggle-knob"></span>
+                </span>
+            </button>
+            <a class="btn btn-outline nav-resume" href="#contact">Let&rsquo;s Connect ↗</a>
+        </div>
     </div>
 </nav>
 
@@ -968,65 +1098,75 @@
             </div>
         </section>
 
-        <!-- ── ACADEMIC ACHIEVEMENTS ── -->
-        <section class="section recognition-section" id="achievements">
-            <div class="section-label reveal">05 / Academic Highlights</div>
-            <h2 class="section-title reveal delay-1" style="text-align:center;">Academic <span class="gradient-text">Achievements</span></h2>
-            <p class="muted recognition-intro reveal delay-2">Semester-wise academic excellence and milestones</p>
-            <div class="academic-grid">
-                <article class="reveal glass-card tilt-card academic-card">
-                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-2-topper.jpg" data-caption="II Semester IT Topper"><img class="academic-image" src="/recognition/semester-2-topper.jpg" alt="II Semester IT Topper result photo" loading="lazy"></button>
-                    <div class="academic-copy"><span class="academic-meta">Semester 2</span><h3>II Semester IT Topper</h3><p>🏆 1st Rank <span aria-hidden="true">&nbsp;•&nbsp;</span> GPA: 9.00</p><p>Dhivyapriya</p></div>
+
+        <!-- ── EDUCATION ── -->
+        <section class="section" id="education">
+            <div class="section-label reveal">05 / Education</div>
+            <h2 class="section-title reveal delay-1">Academic <span class="gradient-text">Background</span></h2>
+            <div class="education-grid">
+                <article class="reveal glass-card tilt-card education-card">
+                    <h3>B.Tech — Information Technology</h3>
+                    <p class="education-school">M.A.M. College of Engineering and Technology</p>
+                    <p class="education-date">2023–2027 · Expected graduation</p>
                 </article>
-                <article class="reveal delay-1 glass-card tilt-card academic-card">
-                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-3-topper.jpg" data-caption="III Semester Topper"><img class="academic-image" src="/recognition/semester-3-topper.jpg" alt="III Semester Topper result photo" loading="lazy"></button>
-                    <div class="academic-copy"><span class="academic-meta">Semester 3</span><h3>III Semester Topper</h3><p>🏆 2nd Rank <span aria-hidden="true">&nbsp;•&nbsp;</span> GPA: 8.68</p><p>Dhivyapriya</p></div>
+                <article class="reveal delay-1 glass-card tilt-card education-card">
+                    <h3>Higher Secondary (HSC)</h3>
+                    <p class="education-school">Government Girls Higher Secondary School, Attur</p>
+                    <p class="education-date">Mathematics and Computer Science</p>
+                    <p class="education-detail">Percentage: 88.5%</p>
                 </article>
-                <article class="reveal glass-card tilt-card academic-card">
-                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-4-topper.jpg" data-caption="IV Semester Result Topper"><img class="academic-image" src="/recognition/semester-4-topper.jpg" alt="IV Semester result toppers photo" loading="lazy"></button>
-                    <div class="academic-copy"><span class="academic-meta">Semester 4</span><h3>IV Semester Result Topper</h3><p>🏆 2nd Rank <span aria-hidden="true">&nbsp;•&nbsp;</span> CGPA: 8.88</p><p>Dhivyapriya</p></div>
-                </article>
-                <article class="reveal delay-1 glass-card tilt-card academic-card">
-                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-5-topper.jpg" data-caption="V Semester Result Topper"><img class="academic-image" src="/recognition/semester-5-topper.jpg" alt="V Semester result toppers photo" loading="lazy"></button>
-                    <div class="academic-copy"><span class="academic-meta">Semester 5</span><h3>V Semester Result Topper</h3><p>🏆 1st Rank <span aria-hidden="true">&nbsp;•&nbsp;</span> GPA: 8.38</p><p>Dhivyapriya</p></div>
-                </article>
-                <article class="reveal glass-card tilt-card academic-card result-awaiting">
-                    <div class="academic-copy"><span class="awaiting-icon" aria-hidden="true">◷</span><span class="academic-meta">Semester 6</span><h3>Result Awaiting</h3><p>Semester result has not been published yet.</p></div>
-                </article>
-                <article class="reveal delay-1 glass-card tilt-card academic-card result-awaiting">
-                    <div class="academic-copy"><span class="awaiting-icon" aria-hidden="true">◷</span><span class="academic-meta">Semester 7</span><h3>Result Awaiting</h3><p>Semester result has not been published yet.</p></div>
-                </article>
-            </div>
-            <p class="muted reveal" style="text-align:center; margin-top:25px;">Consistently ranked among the department toppers across multiple semesters.</p>
-            <div class="milestone-grid">
-                <article class="reveal glass-card tilt-card milestone-card"><strong>Academic Topper</strong><span>Consistently ranked among top students</span></article>
-                <article class="reveal delay-1 glass-card tilt-card milestone-card"><strong>Active Builder</strong><span>Building real-world projects with passion</span></article>
-                <article class="reveal delay-2 glass-card tilt-card milestone-card"><strong>Consistent Practice</strong><span>Regular coding practice on platforms</span></article>
-                <article class="reveal glass-card tilt-card milestone-card"><strong>Fast Learner</strong><span>Quick to adapt to new technologies</span></article>
-                <article class="reveal delay-1 glass-card tilt-card milestone-card"><strong>200+ Coding Problems</strong><span>Solved on <a href="https://leetcode.com/u/gQ7Ctd3MAI/" target="_blank" rel="noopener noreferrer">LeetCode</a> and <a href="https://www.codechef.com/users/gleam_ring_39" target="_blank" rel="noopener noreferrer">CodeChef</a></span></article>
-                <article class="reveal delay-2 glass-card tilt-card milestone-card"><strong>Zero Arrears</strong><span>Maintained throughout B.Tech</span></article>
-                <article class="reveal glass-card tilt-card milestone-card"><strong>CodeChef Java Test</strong><span>83% (2600/3100)</span></article>
-                <article class="reveal delay-1 glass-card tilt-card milestone-card"><strong>CodeAlpha Java Quiz</strong><span>64/70</span></article>
-            </div>
-            <div class="reveal glass-card edu-card education-note">
-                <div class="label-top">Education</div><h3>B.Tech — Information Technology</h3><div class="sub">CGPA: 8.74 / 10</div>
             </div>
         </section>
 
-        <!-- ── ACHIEVEMENTS & RECOGNITION ── -->
+
+        <!-- ── ACADEMIC ACHIEVEMENTS ── -->
+        <section class="section academic-section" id="achievements">
+            <div class="section-label reveal">06 / Academic Achievements</div>
+            <h2 class="section-title reveal delay-1" style="text-align:center;">Academic <span class="gradient-text">Achievements</span></h2>
+            <p class="muted recognition-intro reveal delay-2">Semester-wise academic excellence and recognition.</p>
+            <div class="academic-grid">
+                <article class="reveal glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-2-topper.jpg" data-caption="II Semester IT Topper"><img class="academic-image" src="/recognition/semester-2-topper.jpg" alt="II Semester IT Topper result photo" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">Semester 2</span><h3>II Semester IT Topper</h3><p>🏆 1st Rank · GPA: 9.00</p><p>Dhivyapriya</p></div>
+                </article>
+                <article class="reveal delay-1 glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-3-topper.jpg" data-caption="III Semester Topper"><img class="academic-image" src="/recognition/semester-3-topper.jpg" alt="III Semester Topper result photo" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">Semester 3</span><h3>III Semester Topper</h3><p>🏆 2nd Rank · GPA: 8.68</p><p>Dhivyapriya</p></div>
+                </article>
+                <article class="reveal glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-4-topper.jpg" data-caption="IV Semester Result Topper"><img class="academic-image" src="/recognition/semester-4-topper.jpg" alt="IV Semester result toppers photo" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">Semester 4</span><h3>IV Semester Result Topper</h3><p>🏆 2nd Rank · CGPA: 8.88</p><p>Dhivyapriya</p></div>
+                </article>
+                <article class="reveal delay-1 glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-5-topper.jpg" data-caption="V Semester Result Topper"><img class="academic-image" src="/recognition/semester-5-topper.jpg" alt="V Semester result toppers photo" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">Semester 5</span><h3>V Semester Result Topper</h3><p>🏆 1st Rank · GPA: 8.38</p><p>Dhivyapriya</p></div>
+                </article>
+                <article class="reveal glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/semester-6-topper.png" data-caption="VI Semester Result Toppers — Rank 2, GPA 8.36"><img class="academic-image semester-six-image" src="/recognition/semester-6-topper.png" alt="VI Semester result toppers poster showing Dhivyapriya at Rank 2 with GPA 8.36" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">Semester 6 · Apr/May 2026</span><h3>VI Semester Result Toppers</h3><p>🏆 Rank 2 · GPA: 8.36</p><p>Dhivyapriya</p></div>
+                </article>
+                <article class="reveal delay-1 glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/codetantra-coding-competition.jpeg" data-caption="First Prize — Code Tantra Coding Competition"><img class="academic-image" src="/recognition/codetantra-coding-competition.jpeg" alt="First Prize — Code Tantra Coding Competition" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">2026 · 🥇 Winner</span><h3>First Prize — Code Tantra Coding Competition</h3><p>Won first prize in the Department of Information Technology competition for problem-solving and programming.</p></div>
+                </article>
+                <article class="reveal glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/communication-skills-award.jpeg" data-caption="Communication Skills Excellence Award"><img class="academic-image" src="/recognition/communication-skills-award.jpeg" alt="Communication Skills Excellence Award" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">2026 · ⭐ Award</span><h3>Communication Skills Excellence Award</h3><p>Recognized for outstanding performance in Communication Skills activities, teamwork, and public speaking.</p></div>
+                </article>
+                <article class="reveal delay-1 glass-card tilt-card academic-card">
+                    <button class="academic-image-button" type="button" data-preview="/recognition/department-topper-consistency.jpeg" data-caption="Consistency Award — Department Topper"><img class="academic-image" src="/recognition/department-topper-consistency.jpeg" alt="Consistency Award — Department Topper" loading="lazy"></button>
+                    <div class="academic-copy"><span class="academic-meta">2026 · 🥇 Department Topper</span><h3>Consistency Award — Department Topper</h3><p>Recognized for consistent academic performance and dedication, with a CGPA of 8.82/10.</p></div>
+                </article>
+            </div>
+            <p class="muted reveal" style="text-align:center; margin-top:25px;">Consistently ranked among the department toppers across multiple semesters.</p>
+        </section>
+
+        <!-- ── CERTIFICATES ── -->
         <section class="section recognition-section" id="recognition">
-            <div class="section-label reveal">06 / Recognition</div>
-            <h2 class="section-title reveal delay-1" style="text-align:center;">Achievements &amp; <span class="gradient-text">Recognition</span></h2>
-            <p class="muted recognition-intro reveal delay-2">A collection of certifications, awards, and milestones that reflect my dedication to continuous learning, technical excellence, and professional growth.</p>
+            <div class="section-label reveal">07 / Certificates</div>
+            <h2 class="section-title reveal delay-1" style="text-align:center;"><span class="gradient-text">Certificates</span></h2>
+            <p class="muted recognition-intro reveal delay-2">Professional learning and technical certificates.</p>
             <div class="recognition-grid">
-                <article class="reveal glass-card tilt-card recognition-card">
-                    <button class="recognition-image-button" type="button" data-preview="/recognition/codetantra-coding-competition.jpeg" data-caption="First Prize — Code Tantra Coding Competition"><img class="recognition-image" src="/recognition/codetantra-coding-competition.jpeg" alt="First Prize — Code Tantra Coding Competition" loading="lazy"></button>
-                    <div class="recognition-copy"><h3>First Prize — Code Tantra Coding Competition</h3><span class="recognition-meta">2026 · 🥇 Winner</span><ul class="recognition-points"><li>Won 1st Prize in the Code Tantra Coding Competition organized by the Department of Information Technology.</li><li>Competed in multiple coding rounds focused on problem-solving and programming.</li><li>Strengthened logical thinking, coding skills, and competitive programming abilities.</li></ul></div>
-                </article>
-                <article class="reveal delay-1 glass-card tilt-card recognition-card">
-                    <button class="recognition-image-button" type="button" data-preview="/recognition/communication-skills-award.jpeg" data-caption="Communication Skills Excellence Award"><img class="recognition-image" src="/recognition/communication-skills-award.jpeg" alt="Communication Skills Excellence Award" loading="lazy"></button>
-                    <div class="recognition-copy"><h3>Communication Skills Excellence Award</h3><span class="recognition-meta">2026 · ⭐ Award</span><ul class="recognition-points"><li>Received recognition and a prize for outstanding performance in Communication Skills activities.</li><li>Demonstrated teamwork, public speaking, confidence, and leadership.</li><li>Improved interpersonal and presentation skills.</li></ul></div>
-                </article>
                 <article class="reveal glass-card tilt-card recognition-card">
                     <button class="recognition-image-button" type="button" data-preview="/recognition/ibm-sql-certificate.jpg" data-caption="IBM SQL &amp; Relational Databases 101 Certification"><img class="recognition-image certificate-image" src="/recognition/ibm-sql-certificate.jpg" alt="IBM SQL and Relational Databases 101 certificate" loading="lazy"></button>
                     <div class="recognition-copy"><h3>IBM SQL &amp; Relational Databases 101 Certification</h3><span class="recognition-meta">Jul 2026 · ✔ Certified</span><ul class="recognition-points"><li>Completed the IBM Skills Network course SQL and Relational Databases 101 (DB0101EN) on CognitiveClass.ai.</li><li>Learned SQL queries, database design, normalization, joins, constraints, and relational database concepts.</li></ul></div>
@@ -1036,31 +1176,38 @@
                     <div class="recognition-copy"><h3>AI Fundamentals: Foundations for Understanding AI</h3><span class="recognition-meta">Aug 2026 · IBM SkillsBuild</span><ul class="recognition-points"><li>Credential issued 12 August 2026.</li><li>Explores artificial intelligence, machine learning, neural networks, deep learning, NLP, and computer vision.</li><li>Includes AI ethics and responsible real-world use of AI systems.</li></ul></div>
                 </article>
                 <article class="reveal glass-card tilt-card recognition-card">
-                    <button class="recognition-image-button" type="button" data-preview="/recognition/department-topper-consistency.jpeg" data-caption="Consistency Award — Department Topper"><img class="recognition-image" src="/recognition/department-topper-consistency.jpeg" alt="Consistency Award — Department Topper" loading="lazy"></button>
-                    <div class="recognition-copy"><h3>Consistency Award — Department Topper</h3><span class="recognition-meta">2026 · 🥇 Department Topper</span><ul class="recognition-points"><li>Secured Department Topper with a CGPA of 8.82/10.</li><li>Recognized for consistent academic performance, dedication, and disciplined learning.</li><li>Continued participating in coding competitions, certifications, and software projects.</li></ul></div>
+                    <button class="recognition-image-button" type="button" data-preview="/recognition/ibm-lifelong-skills.png" data-caption="IBM Lifelong Professional Skills"><img class="recognition-image certificate-image" src="/recognition/ibm-lifelong-skills.png" alt="IBM SkillsBuild Lifelong Professional Skills certificate" loading="lazy"></button>
+                    <div class="recognition-copy"><h3>IBM — Lifelong Skills Training</h3><span class="recognition-meta">IBM SkillsBuild</span></div>
                 </article>
-            </div>
-            <div class="resume-certificate-list reveal">
-                <h3>Additional certificates listed on my resume</h3>
-                <div class="resume-certificate-grid">
-                    <article class="glass-card resume-certificate-card"><h4>IBM — Lifelong Skills Training</h4><p>No matching certificate image is displayed on the Lovable portfolio.</p></article>
-                    <article class="glass-card resume-certificate-card"><h4>Fundamental Java Programming — Infosys Springboard</h4><p>No matching certificate image is displayed on the Lovable portfolio.</p></article>
-                    <article class="glass-card resume-certificate-card"><h4>Git &amp; GitHub Version Control Training — NoviTech R&amp;D Pvt. Ltd.</h4><p>No matching certificate image is displayed on the Lovable portfolio.</p></article>
-                    <article class="glass-card resume-certificate-card"><h4>Java Programming — CodeAlpha</h4><p>No matching certificate image is displayed on the Lovable portfolio.</p></article>
-                </div>
+                <article class="reveal delay-1 glass-card tilt-card recognition-card">
+                    <button class="recognition-image-button" type="button" data-preview="/recognition/novitech-github-training.png" data-caption="Master GitHub Like a Pro — NoviTech R&amp;D Pvt. Ltd."><img class="recognition-image certificate-image" src="/recognition/novitech-github-training.png" alt="NoviTech certificate for Master GitHub Like a Pro training" loading="lazy"></button>
+                    <div class="recognition-copy"><h3>Git &amp; GitHub Version Control Training</h3><span class="recognition-meta">NoviTech R&amp;D Pvt. Ltd.</span></div>
+                </article>
+                <article class="reveal glass-card tilt-card recognition-card">
+                    <button class="recognition-image-button" type="button" data-preview="/recognition/codealpha-java-quiz.png" data-caption="Java Programming Quiz — CodeAlpha"><img class="recognition-image certificate-image" src="/recognition/codealpha-java-quiz.png" alt="CodeAlpha Java Programming Quiz certificate, score 64 out of 70" loading="lazy"></button>
+                    <div class="recognition-copy"><h3>Java Programming Quiz</h3><span class="recognition-meta">CodeAlpha · 64/70</span></div>
+                </article>
+                <article class="reveal delay-1 glass-card tilt-card recognition-card">
+                    <button class="recognition-image-button" type="button" data-preview="/recognition/codechef-500-problems.png" data-caption="500 Difficulty Rating — CodeChef"><img class="recognition-image certificate-image" src="/recognition/codechef-500-problems.png" alt="CodeChef certificate for completing all practice problems of 500 difficulty rating" loading="lazy"></button>
+                    <div class="recognition-copy"><h3>CodeChef — 500 Difficulty Rating</h3><span class="recognition-meta">CodeChef</span></div>
+                </article>
             </div>
         </section>
 
         <!-- ── CONTACT ── -->
         <section class="section" id="contact">
             <div class="contact-box reveal">
-                <div class="section-label">07 / Contact</div>
+                <div class="section-label">08 / Contact</div>
                 <h2 class="section-title">Let&rsquo;s Build Something <span class="gradient-text">Great</span></h2>
                 <p class="muted">
                     I am interested in software development opportunities,
                     backend engineering and projects that solve real problems.
                     Let&rsquo;s connect!
                 </p>
+                <div aria-label="Email addresses">
+                    <a class="contact-email" href="mailto:dhivyapriya.v09@gmail.com">dhivyapriya.v09@gmail.com</a><br>
+                    <a class="contact-email" href="mailto:veeraveldhivyapriya@gmail.com">veeraveldhivyapriya@gmail.com</a>
+                </div>
                 <div class="hero-actions" style="justify-content:center; margin-top:28px;">
                     <a class="btn btn-primary"
                        href="https://www.linkedin.com/in/dhivyapriya0906"
@@ -1097,6 +1244,27 @@
 <script>
 (function () {
     "use strict";
+
+    /* ── Persistent dark/light theme ── */
+    const themeToggle = document.getElementById("theme-toggle");
+    const root = document.documentElement;
+    function applyTheme(theme, persist) {
+        const isLight = theme === "light";
+        if (isLight) root.dataset.theme = "light";
+        else root.removeAttribute("data-theme");
+        themeToggle.setAttribute("aria-pressed", String(isLight));
+        const nextLabel = isLight ? "Switch to dark theme" : "Switch to light theme";
+        themeToggle.setAttribute("aria-label", nextLabel);
+        themeToggle.setAttribute("title", nextLabel);
+        if (persist) {
+            try { localStorage.setItem("portfolio-theme", isLight ? "light" : "dark"); }
+            catch (_) { /* Theme still works for this page if storage is unavailable. */ }
+        }
+    }
+    applyTheme(root.dataset.theme === "light" ? "light" : "dark", false);
+    themeToggle.addEventListener("click", () => {
+        applyTheme(root.dataset.theme === "light" ? "dark" : "light", true);
+    });
 
     /* ── Certificate and achievement photo preview ── */
     const preview = document.getElementById("image-preview");
@@ -1228,7 +1396,7 @@
        3. 3D TILT on .tilt-card
     ────────────────────────────── */
     if (!prefersReducedMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-        const MAX_TILT = 8; /* degrees */
+        const MAX_TILT = 5; /* degrees */
 
         document.querySelectorAll(".tilt-card").forEach(card => {
             card.addEventListener("pointermove", e => {
@@ -1240,7 +1408,7 @@
                 const rx = ((cy - y) / cy) * MAX_TILT;
                 const ry = ((x - cx) / cx) * MAX_TILT;
 
-                card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-6px)`;
+                card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-4px)`;
                 card.style.setProperty("--gx", `${(x / r.width  * 100).toFixed(1)}%`);
                 card.style.setProperty("--gy", `${(y / r.height * 100).toFixed(1)}%`);
             });
